@@ -1,6 +1,6 @@
 /**
- * 1. 第一次客户端访问服务器的时候，服务不但会响应对应的文件，还会告诉 客户端这个文件的上次修改时间是什么，客户端收到后会记录此缓存和最后修改时间。
- * 2. 第二次客户端访问服务器的时候，会向服务器访问此文件从上次修改时间之后是否修改过，如果改过，返回最新的文件，如果没改过返回304
+ * 1. expires  指定过期时间
+ * 2. cache-control 指定失效时间，就是多长时间之后过期
  */
 var express = require('express');
 var path = require('path');
@@ -11,11 +11,17 @@ var app = express();
 // http://localhost:9090/index.html
 function static(root){
     return function(req,res,next){
+        console.log(req.url);
         //判断请求的资源是否存在
         //先得到请求的资源的真实路径
         var filename = path.resolve(root,req.path.slice(1));
         fs.exists(filename,function(exists){
             if(exists){
+                var expires = new Date(Date.now()+20*1000);
+                //设置缓存的失效时间
+                res.setHeader('Expires',expires.toUTCString());
+                //设置缓存文件的最长存活时间
+                res.setHeader('Cache-Control','max-age=10');
                 fs.createReadStream(filename).pipe(res);
             }else{
                 next();
