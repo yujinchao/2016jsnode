@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="zfpxMod">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.css">
+</head>
+<body class="container">
+<nav class="navbar navbar-default">
+    <ul class="nav navbar-nav">
+        <li><a href="#/">首页</a></li>
+        <li><a href="#/user">用户管理</a></li>
+    </ul>
+</nav>
+<div class="panel panel-default">
+    <div class="panel-heading">
+       这是我的头
+    </div>
+    <div class="panel-body" ng-view>
+
+    </div>
+    <div class="panel-footer">
+        这是我的尾巴
+    </div>
+</div>
+</body>
+<script src="lib/angular/angular.js"></script>
+<script src="lib/angular-route/angular-route.js"></script>
+<script>
+    angular.module('zfpxMod',['ngRoute']);
+    //用来配置我们的服务
+    //$RouteProvider 可以用来配置路由
+    angular.module('zfpxMod').config(function($routeProvider){
+        $routeProvider.when('/',{
+            template:'首页'
+        }).when('/user',{
+            templateUrl:'pages/user.html'
+        }).when('/user/:id',{
+            template:'{{name}}',
+            controller:function($scope,$routeParams,$http){//控制器用来加强和初始化scope
+                var id = $routeParams.id;
+                // $http == $.ajax
+                $http({
+                    url:'users.json',
+                    method:'GET'
+                }).then(function(data){
+                    var users = data.data;
+                    var user = users.filter(user=>user.id == id)[0];
+                    $scope.name = user?user.name:'未知人';
+                });
+
+            }
+        }).otherwise({
+            redirectTo:'/' //否则 的话重定向到/
+        })
+    });
+</script>
+</html>
